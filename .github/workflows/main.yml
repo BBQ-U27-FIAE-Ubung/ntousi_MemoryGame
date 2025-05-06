@@ -20,10 +20,11 @@ jobs:
       - run: dotnet tool install wix --global --version 5.0.2
       - run: wix extension add --global WixToolset.Util.wixext/5.0.2
       - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe --dest ./build_output
+      - run: ls -al ./build_output  # Εκτυπώνουμε τα περιεχόμενα του φακέλου build_output
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame-Windows.exe
-          path: ./build_output/*.exe  # Ανέβασε το αρχείο .exe από το φάκελο build_output
+          path: ./build_output/*.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -45,10 +46,11 @@ jobs:
             --main-jar MemoryGame-1.0-SNAPSHOT.jar \
             --main-class de.bbq.memorygame.MainApp \
             --type deb
+      - run: ls -al ./build_output  # Εκτυπώνουμε τα περιεχόμενα του φακέλου build_output
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame.deb
-          path: ./build_output/*.deb  # Ανέβασε το αρχείο .deb από το φάκελο build_output
+          path: ./build_output/*.deb
 
   release:
     runs-on: ubuntu-latest
@@ -66,5 +68,5 @@ jobs:
         run: echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "./build_output/*.exe,./build_output/*.deb"  # Κατεβάστε τα αρχεία από το φάκελο build_output
+          artifacts: "./build_output/*.exe,./build_output/*.deb"
           tag: ${{ steps.version.outputs.version }}
