@@ -19,11 +19,11 @@ jobs:
       - run: mvn package
       - run: dotnet tool install wix --global --version 5.0.2
       - run: wix extension add --global WixToolset.Util.wixext/5.0.2
-      - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe
+      - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe --dest ./build_output
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame-Windows.exe
-          path: ./ntousi_MemoryGame-1.0.exe
+          path: ./build_output/*.exe  # Ανέβασε το αρχείο .exe από το φάκελο build_output
 
   build-linux:
     runs-on: ubuntu-latest
@@ -39,17 +39,16 @@ jobs:
       - run: |
           jpackage \
             --input target/ \
-            --dest dist/ \
+            --dest ./build_output/ \
             --name ntousi_MemoryGame \
             --app-version 1.0 \
             --main-jar MemoryGame-1.0-SNAPSHOT.jar \
             --main-class de.bbq.memorygame.MainApp \
             --type deb
-      - run: mv ./dist/*.deb ./ntousi_MemoryGame_1.0-1_amd64.deb
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame.deb
-          path: ./ntousi_MemoryGame_1.0-1_amd64.deb
+          path: ./build_output/*.deb  # Ανέβασε το αρχείο .deb από το φάκελο build_output
 
   release:
     runs-on: ubuntu-latest
@@ -67,5 +66,5 @@ jobs:
         run: echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: ".exe,.deb"
+          artifacts: "./build_output/*.exe,./build_output/*.deb"  # Κατεβάστε τα αρχεία από το φάκελο build_output
           tag: ${{ steps.version.outputs.version }}
