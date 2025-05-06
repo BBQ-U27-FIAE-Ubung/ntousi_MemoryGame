@@ -40,10 +40,16 @@ jobs:
             --win-per-user-install ^
             --win-dir-chooser
 
+      - name: Rename Windows executable
+        run: |
+          $exePath = Get-ChildItem -Path build_output -Filter *.exe | Select-Object -First 1
+          Rename-Item -Path $exePath.FullName -NewName "ntousi_MemoryGame-Windows.exe"
+        shell: pwsh
+
       - uses: actions/upload-artifact@v4
         with:
           name: ntousi_MemoryGame-Windows
-          path: build_output/*.exe
+          path: build_output/ntousi_MemoryGame-Windows.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -71,10 +77,15 @@ jobs:
             --main-jar MemoryGame-1.0-SNAPSHOT.jar \
             --main-class de.bbq.memorygame.MainApp
 
+      - name: Rename Linux package
+        run: |
+          FILE=$(ls build_output/*.deb | head -n 1)
+          mv "$FILE" build_output/ntousi_MemoryGame-Linux.deb
+
       - uses: actions/upload-artifact@v4
         with:
           name: ntousi_MemoryGame-Linux
-          path: build_output/*.deb
+          path: build_output/ntousi_MemoryGame-Linux.deb
 
   release:
     runs-on: ubuntu-latest
