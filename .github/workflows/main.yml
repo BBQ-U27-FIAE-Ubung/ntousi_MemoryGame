@@ -17,8 +17,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - run: mvn compile
-      - run: mvn package
+      - run: mvn clean package
 
       - name: Install WiX Toolset
         run: dotnet tool install wix --global --version 5.0.2
@@ -43,7 +42,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame-Windows.exe
+          name: ntousi_MemoryGame-Windows
           path: build_output/*.exe
 
   build-linux:
@@ -58,10 +57,9 @@ jobs:
           cache: maven
 
       - run: sudo apt-get update
-      - run: sudo apt-get install -y fakeroot binutils dpkg
+      - run: sudo apt-get install -y fakeroot binutils dpkg libfuse2
 
-      - run: mvn compile
-      - run: mvn package
+      - run: mvn clean package
 
       - name: Package with jpackage (Linux)
         run: |
@@ -75,7 +73,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame-Linux.deb
+          name: ntousi_MemoryGame-Linux
           path: build_output/*.deb
 
   release:
@@ -87,17 +85,17 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ntousi_MemoryGame-Windows
-          path: build_output
+          path: release_output
 
       - uses: actions/download-artifact@v4
         with:
           name: ntousi_MemoryGame-Linux
-          path: build_output
+          path: release_output
 
       - id: version
         run: echo "version=$(date +v%Y.%m.%d-%H%M%S)" >> "$GITHUB_OUTPUT"
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: build_output/*.exe,build_output/*.deb
+          artifacts: release_output/*
           tag: ${{ steps.version.outputs.version }}
