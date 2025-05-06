@@ -43,7 +43,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame-Windows
+          name: ntousi_MemoryGame-Windows.exe
           path: build_output/*.exe
 
   build-linux:
@@ -75,7 +75,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame-Linux
+          name: ntousi_MemoryGame-Linux.deb
           path: build_output/*.deb
 
   release:
