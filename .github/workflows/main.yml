@@ -56,7 +56,6 @@ jobs:
           name: ntousi_MemoryGame.deb
       - id: version
         run: echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
-        echo "Version: ${{ steps.version.outputs.version }}"
       - uses: ncipollo/release-action@v1
         with:
           artifacts: ".exe,.deb"
