@@ -14,16 +14,20 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'zulu'
+          distribution: 'temurin'
           cache: maven
 
-      - name: Build JAR with Maven
-        run: mvn clean package
+      - run: mvn compile
+      - run: mvn package
 
-      - name: Create build_output folder
-        run: mkdir build_output
+      - name: Install WiX Toolset
+        run: dotnet tool install wix --global --version 5.0.2
+
+      - name: Add WiX Extension
+        run: wix extension add --global WixToolset.Util.wixext/5.0.2
 
       - name: Package with jpackage (Windows)
+        shell: cmd
         run: |
           jpackage ^
             --type exe ^
@@ -37,8 +41,7 @@ jobs:
             --win-per-user-install ^
             --win-dir-chooser
 
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ntousi_MemoryGame-Windows
           path: build_output/*.exe
@@ -51,17 +54,14 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'zulu'
+          distribution: 'temurin'
           cache: maven
 
-      - name: Install jpackage dependencies
-        run: sudo apt-get update && sudo apt-get install -y libfreetype6 fakeroot
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y fakeroot binutils dpkg
 
-      - name: Build JAR with Maven
-        run: mvn clean package
-
-      - name: Create build_output folder
-        run: mkdir build_output
+      - run: mvn compile
+      - run: mvn package
 
       - name: Package with jpackage (Linux)
         run: |
@@ -73,18 +73,16 @@ jobs:
             --main-jar MemoryGame-1.0-SNAPSHOT.jar \
             --main-class de.bbq.memorygame.MainApp
 
-      - name: Upload Linux Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ntousi_MemoryGame-Linux
           path: build_output/*.deb
 
   release:
     runs-on: ubuntu-latest
-    needs: [build-linux, build-windows]
+    needs: [build-windows, build-linux]
     permissions:
       contents: write
-
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -96,14 +94,10 @@ jobs:
           name: ntousi_MemoryGame-Linux
           path: build_output
 
-      - name: Show files
-        run: ls -la build_output
-
       - id: version
-        run: echo "version=$(date +v%Y.%m.%d-%H%M%S)" >> $GITHUB_OUTPUT
+        run: echo "version=$(date +v%Y.%m.%d-%H%M%S)" >> "$GITHUB_OUTPUT"
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1
         with:
           artifacts: build_output/*.exe,build_output/*.deb
           tag: ${{ steps.version.outputs.version }}
