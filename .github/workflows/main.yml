@@ -42,9 +42,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - run: sudo apt update
-      - run: sudo apt install -y jpackage fakeroot
-
       - run: mvn compile
       - run: mvn package
 
