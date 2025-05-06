@@ -3,59 +3,61 @@ name: Build Java Project
 on:
   push:
     branches: 
-    - "main"
+      - "main"
 
 jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - run: mvn compile
-    - run: mvn package
-    - run: dotnet tool install wix --global --version 5.0.2
-    - run: wix extension add --global WixToolset.Util.wixext/5.0.2
-    - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name Wochenberichte --main-jar Wochenberichte-1.0-SNAPSHOT.jar --main-class de.bbq.wochenberichte.Main --type exe
-    - uses: actions/upload-artifact@v4.6.2
-      with:
-        name: ntousi_MemoryGame-Windows.exe
-        path: ./ntousi_MemoryGame-1.0.exe
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - run: mvn compile
+      - run: mvn package
+      - run: dotnet tool install wix --global --version 5.0.2
+      - run: wix extension add --global WixToolset.Util.wixext/5.0.2
+      - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name Wochenberichte --main-jar Wochenberichte-1.0-SNAPSHOT.jar --main-class de.bbq.wochenberichte.Main --type exe
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ntousi_MemoryGame-Windows.exe
+          path: ./ntousi_MemoryGame-1.0.exe
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - run: mvn compile
-    - run: mvn package
-    - run: jpackage --input target/ --name ntousi_MemoryGame --main-jar ntousi_MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.wochenberichte.Main --type deb
-    - uses: actions/upload-artifact@v4.6.2
-      with:
-        name: ntousi_MemoryGame.deb
-        path: ./ntousi_MemoryGame_1.0-1_amd64.deb
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - run: mvn compile
+      - run: mvn package
+      - run: jpackage --input target/ --name ntousi_MemoryGame --main-jar ntousi_MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.wochenberichte.Main --type deb
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ntousi_MemoryGame.deb
+          path: ./ntousi_MemoryGame_1.0-1_amd64.deb
+
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     needs: [build-linux, build-windows]
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: ntousi_MemoryGame-Windows.exe
-    - uses: actions/download-artifact@v4
-      with:
-        name: ntousi_MemoryGame-Linux.deb
-    - id: version
-      run:  echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
-    - uses: ncipollo/release-action@v1
-      with:
-        artifacts: ".exe,.deb"
-        tag: ${{ steps.version.outputs.version }}
-        
+      - uses: actions/download-artifact@v4
+        with:
+          name: ntousi_MemoryGame-Windows.exe
+      - uses: actions/download-artifact@v4
+        with:
+          name: ntousi_MemoryGame.deb
+      - id: version
+        run: echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
+        echo "Version: ${{ steps.version.outputs.version }}"
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: ".exe,.deb"
+          tag: ${{ steps.version.outputs.version }}
