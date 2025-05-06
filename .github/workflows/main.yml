@@ -15,26 +15,21 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
       - run: mvn compile
       - run: mvn package
+
       - run: dotnet tool install wix --global --version 5.0.2
       - run: wix extension add --global WixToolset.Util.wixext/5.0.2
-      - run: |
-          jpackage ^
-            --win-menu ^
-            --win-per-user-install ^
-            --win-shortcut ^
-            --win-shortcut-prompt ^
-            --win-dir-chooser ^
-            --input target ^
-            --name ntousi_MemoryGame ^
-            --main-jar MemoryGame-1.0-SNAPSHOT.jar ^
-            --main-class de.bbq.memorygame.MainApp ^
-            --type exe ^
-            --dest build_output
+
+      - name: Package EXE with jpackage
+        shell: cmd
+        run: >
+          jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe --dest build_output
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame-Windows.exe
+          name: ntousi_MemoryGame-Windows
           path: build_output/*.exe
 
   build-linux:
@@ -46,19 +41,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
+      - run: sudo apt update
+      - run: sudo apt install -y jpackage fakeroot
+
       - run: mvn compile
       - run: mvn package
-      - run: |
-          jpackage \
-            --input target \
-            --name ntousi_MemoryGame \
-            --main-jar MemoryGame-1.0-SNAPSHOT.jar \
-            --main-class de.bbq.memorygame.MainApp \
-            --type deb \
-            --dest build_output
+
+      - name: Package DEB with jpackage
+        run: >
+          jpackage --input target --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type deb --dest build_output
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ntousi_MemoryGame.deb
+          name: ntousi_MemoryGame-Linux
           path: build_output/*.deb
 
   release:
@@ -69,16 +65,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: ntousi_MemoryGame-Windows.exe
-          path: ./build_output
+          name: ntousi_MemoryGame-Windows
+
       - uses: actions/download-artifact@v4
         with:
-          name: ntousi_MemoryGame.deb
-          path: ./build_output
+          name: ntousi_MemoryGame-Linux
+
       - id: version
         run: echo "version=$(date +'v%Y.%m.%d-%H%M%S')" >> "$GITHUB_OUTPUT"
-      - run: ls -al ./build_output
+
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "./build_output/*.exe,./build_output/*.deb"
+          artifacts: "build_output/*.exe,build_output/*.deb"
           tag: ${{ steps.version.outputs.version }}
