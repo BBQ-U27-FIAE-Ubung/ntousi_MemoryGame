@@ -20,7 +20,7 @@ jobs:
       - run: dotnet tool install wix --global --version 5.0.2
       - run: wix extension add --global WixToolset.Util.wixext/5.0.2
       - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe --dest ./build_output
-      - run: ls -al ./build_output  # Εκτυπώνουμε τα περιεχόμενα του φακέλου build_output
+      - run: Get-ChildItem -Path ./build_output  # Χρησιμοποιούμε PowerShell cmdlet για εκτύπωση περιεχομένων
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame-Windows.exe
@@ -46,7 +46,7 @@ jobs:
             --main-jar MemoryGame-1.0-SNAPSHOT.jar \
             --main-class de.bbq.memorygame.MainApp \
             --type deb
-      - run: ls -al ./build_output  # Εκτυπώνουμε τα περιεχόμενα του φακέλου build_output
+      - run: ls -al ./build_output  # Στο Linux χρησιμοποιούμε ls
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame.deb
