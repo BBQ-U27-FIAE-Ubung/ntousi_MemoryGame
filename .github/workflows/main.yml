@@ -19,11 +19,11 @@ jobs:
       - run: mvn package
       - run: dotnet tool install wix --global --version 5.0.2
       - run: wix extension add --global WixToolset.Util.wixext/5.0.2
-      - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe
+      - run: jpackage --win-menu --win-per-user-install --win-shortcut --win-shortcut-prompt --win-dir-chooser --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type exe
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame-Windows.exe
-          path: ./MemoryGame-1.0.exe
+          path: ./ntousi_MemoryGame-1.0.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -36,7 +36,16 @@ jobs:
           cache: maven
       - run: mvn compile
       - run: mvn package
-      - run: jpackage --input target/ --name ntousi_MemoryGame --main-jar MemoryGame-1.0-SNAPSHOT.jar --main-class de.bbq.memorygame.MainApp --type deb
+      - run: |
+          jpackage \
+            --input target/ \
+            --dest dist/ \
+            --name ntousi_MemoryGame \
+            --app-version 1.0 \
+            --main-jar MemoryGame-1.0-SNAPSHOT.jar \
+            --main-class de.bbq.memorygame.MainApp \
+            --type deb
+      - run: mv ./dist/*.deb ./ntousi_MemoryGame_1.0-1_amd64.deb
       - uses: actions/upload-artifact@v4.6.2
         with:
           name: ntousi_MemoryGame.deb
