@@ -95,12 +95,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: ntousi_MemoryGame-Windows
+          name: ntousi_MemoryGame-Windows.exe
           path: release_output
 
       - uses: actions/download-artifact@v4
         with:
-          name: ntousi_MemoryGame-Linux
+          name: ntousi_MemoryGame-Linux.deb
           path: release_output
 
       - id: version
